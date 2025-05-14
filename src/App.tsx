@@ -11,6 +11,8 @@ import Auctions from "./pages/Auctions";
 import AuctionDetail from "./pages/AuctionDetail";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import HowItWorks from "./pages/HowItWorks";
+import Categories from "./pages/Categories";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/auction/:id" element={<AuctionDetail />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/register" element={<Auth />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/categories" element={<Categories />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
