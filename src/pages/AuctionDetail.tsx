@@ -260,10 +260,10 @@ const AuctionDetail = () => {
               <h3 className="font-semibold text-lg mb-2">Seller Information</h3>
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mr-4">
-                  <span className="text-lg font-bold">{auction.seller.name.substring(0, 2).toUpperCase()}</span>
+                  <span className="text-lg font-bold">{auction.seller?.name.substring(0, 2).toUpperCase() || "JS"}</span>
                 </div>
                 <div>
-                  <p className="font-medium">{auction.seller.name}</p>
+                  <p className="font-medium">{auction.seller?.name || "John Seller"}</p>
                   <p className="text-sm text-muted-foreground">Member since Jan 2024 • 98.5% Positive Feedback</p>
                 </div>
               </div>
@@ -273,7 +273,7 @@ const AuctionDetail = () => {
                   <p className="text-sm text-muted-foreground">Items Sold</p>
                 </div>
                 <div className="p-2 border rounded">
-                  <p className="font-medium">{auction.seller.rating}/5</p>
+                  <p className="font-medium">{auction.seller?.rating || 4.8}/5</p>
                   <p className="text-sm text-muted-foreground">Rating</p>
                 </div>
                 <div className="p-2 border rounded">
