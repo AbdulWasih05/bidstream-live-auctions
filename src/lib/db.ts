@@ -50,7 +50,7 @@ export const fetchListings = async (): Promise<Listing[]> => {
     seller_id: Math.floor(Math.random() * 2) + 1, // Random seller ID (1 or 2)
     title: item.title,
     description: item.description,
-    start_price: item.startingBid,
+    start_price: item.currentBid, // Use currentBid as start_price since startingBid doesn't exist
     current_price: item.currentBid,
     end_time: item.endTime,
     created_at: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)), // Random date within the past week
@@ -124,7 +124,6 @@ export const convertListingToAuctionItem = (listing: Listing): AuctionItem => {
     description: listing.description || "",
     imageUrl: `/placeholder.svg`, // Would be replaced with actual image URLs from DB
     currentBid: listing.current_price || listing.start_price,
-    startingBid: listing.start_price,
     endTime: listing.end_time,
     isActive: new Date() < listing.end_time,
     bidsCount: Math.floor(Math.random() * 10), // Would come from count query in real app
