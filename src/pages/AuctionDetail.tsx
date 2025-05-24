@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -7,8 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuctionTimer } from "@/components/auction/AuctionTimer";
 import { formatCurrency } from "@/lib/formatters";
 import { AuctionItem } from "@/components/auction/AuctionCard";
-import { fetchListingById, fetchBidsByListingId, createBid, convertListingToAuctionItem, Bid } from "@/lib/db";
-import { toast } from "sonner";
+import { mockAuctions, getAuctionById } from "@/lib/mock-data";
 
 const AuctionDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,87 +16,52 @@ const AuctionDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [bidAmount, setBidAmount] = useState("");
   const [relatedItems, setRelatedItems] = useState<AuctionItem[]>([]);
-  const [bids, setBids] = useState<Bid[]>([]);
 
   // Get minimum bid amount (current bid + increment)
   const minimumBid = auction ? auction.currentBid + (auction.currentBid * 0.05) : 0;
 
   useEffect(() => {
-    // Fetch data from our database
-    const fetchAuctionData = async () => {
-      setIsLoading(true);
-      
-      try {
-        if (id) {
-          // Fetch the listing from database
-          const listing = await fetchListingById(id);
-          
-          if (listing) {
-            // Convert database listing to AuctionItem
-            const auctionItem = convertListingToAuctionItem(listing);
-            setAuction(auctionItem);
-            
-            // Fetch the bids for this listing
-            const listingBids = await fetchBidsByListingId(listing.id);
-            setBids(listingBids);
-            
-            // For related items we would do another database query
-            // Here we're just simulating it with random example items
-            const mockRelated = [];
-            for (let i = 0; i < 4; i++) {
-              const relatedId = (parseInt(id) + i + 1) % 10 || 1;
-              const relatedListing = await fetchListingById(relatedId.toString());
-              if (relatedListing && relatedListing.id !== parseInt(id)) {
-                mockRelated.push(convertListingToAuctionItem(relatedListing));
-              }
-            }
-            setRelatedItems(mockRelated.slice(0, 4));
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching auction:", error);
-        toast.error("Failed to load auction details");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Simulate API call
+    setIsLoading(true);
     
-    fetchAuctionData();
+    setTimeout(() => {
+      if (id) {
+        const foundAuction = getAuctionById(id);
+        setAuction(foundAuction);
+        
+        // Get related items from same category
+        if (foundAuction) {
+          const related = mockAuctions
+            .filter(item => item.category === foundAuction.category && item.id !== foundAuction.id)
+            .slice(0, 4);
+          setRelatedItems(related);
+        }
+      }
+      setIsLoading(false);
+    }, 700);
   }, [id]);
 
-  const handleBidSubmit = async (e: React.FormEvent) => {
+  const handleBidSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseFloat(bidAmount);
     if (isNaN(amount) || amount < minimumBid) {
-      toast.error(`Bid must be at least ${formatCurrency(minimumBid)}`);
+      alert(`Bid must be at least ${formatCurrency(minimumBid)}`);
       return;
     }
     
-    try {
-      if (auction) {
-        // In a real app, we'd get the actual user ID from authentication
-        const userId = 3; // Assuming user ID 3 (Bob Buyer)
-        
-        // Create the bid in database
-        const newBid = await createBid(parseInt(auction.id), userId, amount);
-        
-        // Update bids list
-        setBids([newBid, ...bids]);
-        
-        // Update auction state
-        setAuction({
-          ...auction,
-          currentBid: amount,
-          bidsCount: auction.bidsCount + 1,
-        });
-        
-        toast.success(`Bid of ${formatCurrency(amount)} placed successfully!`);
-        setBidAmount("");
-      }
-    } catch (error) {
-      console.error("Error placing bid:", error);
-      toast.error("Failed to place bid. Please try again.");
+    // In a real app, this would send the bid to the server
+    alert(`Bid of ${formatCurrency(amount)} placed successfully!`);
+    
+    // Update the auction data (simulation)
+    if (auction) {
+      setAuction({
+        ...auction,
+        currentBid: amount,
+        bidsCount: auction.bidsCount + 1,
+      });
     }
+    
+    setBidAmount("");
   };
 
   if (isLoading) {
@@ -259,10 +224,10 @@ const AuctionDetail = () => {
               <h3 className="font-semibold text-lg mb-2">Seller Information</h3>
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mr-4">
-                  <span className="text-lg font-bold">{auction.seller?.name.substring(0, 2).toUpperCase() || "JS"}</span>
+                  <span className="text-lg font-bold">JD</span>
                 </div>
                 <div>
-                  <p className="font-medium">{auction.seller?.name || "John Seller"}</p>
+                  <p className="font-medium">JohnDoe123</p>
                   <p className="text-sm text-muted-foreground">Member since Jan 2024 • 98.5% Positive Feedback</p>
                 </div>
               </div>
@@ -272,7 +237,7 @@ const AuctionDetail = () => {
                   <p className="text-sm text-muted-foreground">Items Sold</p>
                 </div>
                 <div className="p-2 border rounded">
-                  <p className="font-medium">{auction.seller?.rating || 4.8}/5</p>
+                  <p className="font-medium">4.9/5</p>
                   <p className="text-sm text-muted-foreground">Rating</p>
                 </div>
                 <div className="p-2 border rounded">
@@ -282,22 +247,24 @@ const AuctionDetail = () => {
               </div>
             </TabsContent>
             <TabsContent value="history" className="p-4 border rounded-md mt-2">
-              <h3 className="font-semibold text-lg mb-2">Bid History ({bids.length} bids)</h3>
-              {bids.length > 0 ? (
-                <div className="space-y-2">
-                  {bids.map((bid) => (
-                    <div key={bid.id} className="flex justify-between py-2 border-b">
-                      <span className="font-medium">User***{bid.user_id}</span>
-                      <span>{formatCurrency(bid.bid_amount)}</span>
-                      <span className="text-muted-foreground">
-                        {new Date(bid.bid_time).toLocaleDateString()} at {new Date(bid.bid_time).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  ))}
+              <h3 className="font-semibold text-lg mb-2">Bid History ({auction.bidsCount} bids)</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between py-2 border-b">
+                  <span className="font-medium">User***123</span>
+                  <span>{formatCurrency(auction.currentBid)}</span>
+                  <span className="text-muted-foreground">2 hours ago</span>
                 </div>
-              ) : (
-                <p className="text-center py-4 text-muted-foreground">No bids yet. Be the first to bid!</p>
-              )}
+                <div className="flex justify-between py-2 border-b">
+                  <span className="font-medium">User***456</span>
+                  <span>{formatCurrency(auction.currentBid * 0.95)}</span>
+                  <span className="text-muted-foreground">5 hours ago</span>
+                </div>
+                <div className="flex justify-between py-2 border-b">
+                  <span className="font-medium">User***789</span>
+                  <span>{formatCurrency(auction.currentBid * 0.9)}</span>
+                  <span className="text-muted-foreground">1 day ago</span>
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
