@@ -3,47 +3,24 @@ import { useEffect, useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AuctionCard, AuctionItem } from "@/components/auction/AuctionCard";
 import { SearchFilters, FilterOptions } from "@/components/auction/SearchFilters";
-import { fetchListings, convertListingToAuctionItem } from "@/lib/db";
-import { toast } from "sonner";
+import { mockAuctions } from "@/lib/mock-data";
 
 const Auctions = () => {
   const [auctions, setAuctions] = useState<AuctionItem[]>([]);
   const [filteredAuctions, setFilteredAuctions] = useState<AuctionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Calculate min and max price (will be set after data loads)
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000);
+  // Calculate min and max price from the auctions
+  const minPrice = Math.min(...mockAuctions.map(a => a.currentBid));
+  const maxPrice = Math.max(...mockAuctions.map(a => a.currentBid));
 
   useEffect(() => {
-    const loadAuctions = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch listings from database
-        const listings = await fetchListings();
-        
-        // Convert to AuctionItem format for frontend
-        const auctionItems = listings.map(listing => convertListingToAuctionItem(listing));
-        
-        setAuctions(auctionItems);
-        setFilteredAuctions(auctionItems);
-        
-        // Calculate price range
-        if (auctionItems.length > 0) {
-          const min = Math.min(...auctionItems.map(a => a.currentBid));
-          const max = Math.max(...auctionItems.map(a => a.currentBid));
-          setMinPrice(min);
-          setMaxPrice(max);
-        }
-      } catch (error) {
-        console.error("Error loading auctions:", error);
-        toast.error("Failed to load auctions");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadAuctions();
+    // Simulating API call
+    setTimeout(() => {
+      setAuctions(mockAuctions);
+      setFilteredAuctions(mockAuctions);
+      setIsLoading(false);
+    }, 700);
   }, []);
 
   const handleApplyFilters = (filters: FilterOptions) => {
@@ -104,7 +81,7 @@ const Auctions = () => {
         {isLoading ? (
           <div className="text-center py-20">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4 text-lg text-muted-foreground">Loading auctions from database...</p>
+            <p className="mt-4 text-lg text-muted-foreground">Loading auctions...</p>
           </div>
         ) : (
           <>

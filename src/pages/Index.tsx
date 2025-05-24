@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AuctionCard, AuctionItem } from "@/components/auction/AuctionCard";
 import { FeaturedAuction } from "@/components/auction/FeaturedAuction";
 import { CategoryFilter } from "@/components/auction/CategoryFilter";
-import { fetchListings, convertListingToAuctionItem } from "@/lib/db";
-import { mockCategories } from "@/lib/mock-data";
-import { toast } from "sonner";
+import { mockAuctions, mockCategories, getFeaturedAuction } from "@/lib/mock-data";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -18,31 +16,12 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadAuctions = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch listings from database
-        const listings = await fetchListings();
-        
-        // Convert to AuctionItem format for frontend
-        const auctionItems = listings.map(listing => convertListingToAuctionItem(listing));
-        
-        setAuctions(auctionItems);
-        
-        // Set featured auction (highest current price)
-        if (auctionItems.length > 0) {
-          const featured = [...auctionItems].sort((a, b) => b.currentBid - a.currentBid)[0];
-          setFeaturedAuction(featured);
-        }
-      } catch (error) {
-        console.error("Error loading auctions:", error);
-        toast.error("Failed to load auctions");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadAuctions();
+    // Simulating API call
+    setTimeout(() => {
+      setAuctions(mockAuctions);
+      setFeaturedAuction(getFeaturedAuction());
+      setIsLoading(false);
+    }, 500);
   }, []);
 
   const filteredAuctions = selectedCategory === "all"
@@ -78,7 +57,7 @@ const Index = () => {
         {isLoading ? (
           <div className="text-center py-20">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4 text-lg text-muted-foreground">Loading auctions from database...</p>
+            <p className="mt-4 text-lg text-muted-foreground">Loading auctions...</p>
           </div>
         ) : (
           <>
