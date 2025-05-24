@@ -39,7 +39,7 @@ export const FeaturedAuction = ({ item }: FeaturedAuctionProps) => {
               <Button size="lg" className="bg-white text-auction-blue hover:bg-gray-100">
                 <Link to={`/auction/${item.id}`}>Bid Now</Link>
               </Button>
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+              <Button variant="outline" size="lg" className="border-white bg-white/10">
                 <Link to={`/auction/${item.id}`}>View Details</Link>
               </Button>
             </div>
